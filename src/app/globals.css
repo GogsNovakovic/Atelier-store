@@ -1,26 +1,487 @@
 @import "tailwindcss";
 
+/*
+ * Atelier design system
+ * Monochrome, image-led, hairline-bordered. Colour comes from photography;
+ * the interface stays quiet. Square corners everywhere, small uppercase
+ * tracked labels, generous whitespace, light-weight large headings.
+ */
+
+/* Runtime values that change per breakpoint. Exposed to Tailwind via @theme inline. */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --header-height: 3.5rem;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
+@media (width >= 64rem) {
   :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+    --header-height: 4.5rem;
   }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+@theme inline {
+  --spacing-header: var(--header-height);
+  --spacing-hero: calc(100svh - var(--header-height)); /* first screen below the sticky header */
+}
+
+@theme {
+  /* ---------- Colour ---------- */
+  --color-canvas: #ffffff; /* page background */
+  --color-ink: #0a0a0a; /* primary text, primary buttons */
+  --color-ink-soft: #2b2b2b; /* primary button hover */
+  --color-muted: #6b6b6b; /* secondary text: 5.3:1 on canvas */
+  --color-subtle: #949494; /* placeholders, disabled; non-essential text only */
+  --color-surface: #f4f4f2; /* product image stage, subtle panels */
+  --color-surface-strong: #e9e9e6; /* hover/pressed surface */
+  --color-line: #e3e3e3; /* hairline dividers and field borders */
+  --color-line-strong: #0a0a0a; /* active / focused borders */
+  --color-accent: #6f1d26; /* deep oxblood: sale, notices. Use sparingly. */
+  --color-danger: #b42318;
+  --color-success: #2e6b3c;
+
+  /* ---------- Typography ---------- */
+  --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
+
+  /* Fluid editorial sizes; fixed UI sizes. */
+  --text-display: clamp(2.5rem, 1.6rem + 4.5vw, 5.5rem);
+  --text-display--line-height: 1;
+  --text-display--letter-spacing: -0.02em;
+
+  --text-title: clamp(1.75rem, 1.4rem + 1.75vw, 3rem);
+  --text-title--line-height: 1.1;
+  --text-title--letter-spacing: -0.01em;
+
+  --text-heading: clamp(1.125rem, 1rem + 0.5vw, 1.5rem);
+  --text-heading--line-height: 1.25;
+
+  --text-body: 0.9375rem; /* 15px reading text */
+  --text-body--line-height: 1.6;
+
+  --text-ui: 0.8125rem; /* 13px product names, prices, nav */
+  --text-ui--line-height: 1.45;
+
+  --text-label: 0.6875rem; /* 11px, used uppercase + tracked */
+  --text-label--line-height: 1.3;
+  --text-label--letter-spacing: 0.12em;
+
+  --tracking-label: 0.12em;
+  --tracking-wide-ui: 0.06em;
+  --tracking-wordmark: 0.32em;
+
+  /* ---------- Spacing ---------- */
+  /* Base scale stays Tailwind's 0.25rem step; these are semantic rhythm tokens. */
+  --spacing-gutter: clamp(1rem, 0.5rem + 2.5vw, 2.5rem); /* page side padding */
+  --spacing-section: clamp(3.5rem, 2rem + 6vw, 8rem); /* between page sections */
+  --spacing-stack: clamp(1.5rem, 1rem + 2vw, 3rem); /* between blocks in a section. Not "block": inline-block would collide */
+
+  /* ---------- Containers (max-w-*) ---------- */
+  --container-page: 120rem; /* 1920px: wide, image-led */
+  --container-content: 80rem; /* 1280px: listings, editorial text+image */
+  --container-narrow: 40rem; /* 640px: forms, account, checkout steps */
+  --container-prose: 36rem; /* ~65ch reading measure */
+
+  /* ---------- Shape ---------- */
+  /* Square corners: removes rounded-sm…3xl. rounded-full (dots, avatars) and rounded-none remain. */
+  --radius-*: initial;
+
+  /* ---------- Imagery ---------- */
+  --aspect-product: 4 / 5; /* product cards */
+  --aspect-portrait: 3 / 4; /* editorial portrait */
+  --aspect-landscape: 3 / 2;
+  --aspect-hero: 16 / 9;
+
+  /* ---------- Motion ---------- */
+  --ease-luxe: cubic-bezier(0.2, 0, 0, 1);
+  --duration-fast: 150ms;
+  --duration-base: 300ms;
+  --duration-slow: 600ms;
+
+  /* The page's one orchestrated moment: the hero settles on load. */
+  --animate-settle: settle 1.8s var(--ease-luxe) both;
+  --animate-rise: rise 0.9s var(--ease-luxe) both;
+
+  @keyframes settle {
+    from {
+      transform: scale(1.06);
+    }
+  }
+
+  @keyframes rise {
+    from {
+      opacity: 0;
+      transform: translateY(0.75rem);
+    }
+  }
+}
+
+/* ================================================================ */
+/* Base                                                              */
+/* ================================================================ */
+
+@layer base {
+  *,
+  ::before,
+  ::after,
+  ::backdrop,
+  ::file-selector-button {
+    border-color: var(--color-line);
+  }
+
+  html {
+    background-color: var(--color-canvas);
+    color: var(--color-ink);
+    font-family: var(--font-sans);
+    -webkit-text-size-adjust: 100%;
+    text-rendering: optimizeLegibility;
+    scroll-padding-top: calc(var(--header-height) + 1rem); /* keeps focus rings and anchors clear of the sticky header */
+  }
+
+  body {
+    font-size: var(--text-body);
+    line-height: var(--text-body--line-height);
+    overflow-x: clip; /* contain .full-bleed without breaking position: sticky */
+  }
+
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    font-weight: 400;
+    text-wrap: balance;
+  }
+
+  p {
+    text-wrap: pretty;
+  }
+
+  ::selection {
+    background-color: var(--color-ink);
+    color: var(--color-canvas);
+  }
+
+  :focus-visible {
+    outline: 1px solid currentColor; /* follows text colour, so it shows on dark bands too */
+    outline-offset: 3px;
+  }
+
+  /* Modal menu open: freeze the page behind it. */
+  html:has(dialog[open]) {
+    overflow: hidden;
+  }
+
+  input::placeholder,
+  textarea::placeholder {
+    color: var(--color-subtle);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    ::before,
+    ::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
+}
+
+/* ================================================================ */
+/* Typography utilities                                              */
+/* ================================================================ */
+
+/* Small uppercase tracked text: nav, eyebrows, buttons, tags. */
+@utility label {
+  font-size: var(--text-label);
+  line-height: var(--text-label--line-height);
+  letter-spacing: var(--tracking-label);
+  text-transform: uppercase;
+  font-weight: 500;
+}
+
+/* Uppercase at UI size, for nav items and section headers. */
+@utility label-lg {
+  font-size: var(--text-ui);
+  line-height: var(--text-ui--line-height);
+  letter-spacing: var(--tracking-wide-ui);
+  text-transform: uppercase;
+  font-weight: 500;
+}
+
+/* Store name set as a wordmark. When centred, add pl-(--tracking-wordmark) to balance the trailing tracking. */
+@utility wordmark {
+  text-transform: uppercase;
+  letter-spacing: var(--tracking-wordmark);
+  font-weight: 500;
+}
+
+/* Tabular figures for prices and quantities. */
+@utility numeric {
+  font-variant-numeric: tabular-nums;
+}
+
+/* ================================================================ */
+/* Layout primitives                                                 */
+/* ================================================================ */
+
+/* Centred page container with fluid gutters. Pair with max-w-* to narrow. */
+@utility container-page {
+  width: 100%;
+  max-width: var(--container-page);
+  margin-inline: auto;
+  padding-inline: var(--spacing-gutter);
+}
+
+@utility container-content {
+  width: 100%;
+  max-width: calc(var(--container-content) + 2 * var(--spacing-gutter));
+  margin-inline: auto;
+  padding-inline: var(--spacing-gutter);
+}
+
+@utility container-narrow {
+  width: 100%;
+  max-width: calc(var(--container-narrow) + 2 * var(--spacing-gutter));
+  margin-inline: auto;
+  padding-inline: var(--spacing-gutter);
+}
+
+/* Break out of a container to the viewport edges (heroes, campaign imagery). */
+@utility full-bleed {
+  width: 100vw;
+  margin-inline: calc(50% - 50vw);
+}
+
+/* Vertical rhythm between page sections. */
+@utility section {
+  padding-block: var(--spacing-section);
+}
+
+/* 2 → 4 column product grid: tight columns, airy rows. Skips 3 columns so sets of 4 and 8 never orphan. */
+@utility grid-products {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  column-gap: 0.25rem;
+  row-gap: 2.5rem;
+
+  @media (width >= 48rem) {
+    row-gap: 3.5rem;
+  }
+
+  @media (width >= 64rem) {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+
+/* 12-column editorial grid (4 on mobile, 8 on tablet) with gutter-width gaps. */
+@utility grid-editorial {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: var(--spacing-gutter);
+
+  @media (width >= 48rem) {
+    grid-template-columns: repeat(8, minmax(0, 1fr));
+  }
+
+  @media (width >= 64rem) {
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+  }
+}
+
+/* Neutral stage behind product photography; children fill it. */
+@utility media-stage {
+  position: relative;
+  overflow: hidden;
+  background-color: var(--color-surface);
+
+  & > img,
+  & > video,
+  & > picture {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+}
+
+/* Horizontal snap scroller for mobile carousels and category rails. */
+@utility scroller-x {
+  display: flex;
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+  scroll-snap-type: x mandatory;
+  scrollbar-width: none;
+
+  &::-webkit-scrollbar {
+    display: none;
+  }
+
+  & > * {
+    flex: none;
+    scroll-snap-align: start;
+  }
+}
+
+/* Hairline rule. */
+@utility divider {
+  border: 0;
+  border-top: 1px solid var(--color-line);
+}
+
+/* ================================================================ */
+/* Links                                                             */
+/* ================================================================ */
+
+/* Inline text link: always underlined, underline thins out on hover. */
+@utility link {
+  text-decoration-line: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.25em;
+  transition: text-decoration-color var(--duration-fast) var(--ease-luxe);
+
+  @media (hover: hover) {
+    &:hover {
+      text-decoration-color: transparent;
+    }
+  }
+}
+
+/* Nav / quiet link: no underline until hover, underline draws in from the left. */
+@utility link-reveal {
+  background-image: linear-gradient(currentColor, currentColor);
+  background-position: 0 100%;
+  background-repeat: no-repeat;
+  background-size: 0% 1px;
+  padding-bottom: 2px;
+  transition: background-size var(--duration-base) var(--ease-luxe);
+
+  @media (hover: hover) {
+    &:hover {
+      background-size: 100% 1px;
+    }
+  }
+
+  &[aria-current="page"] {
+    background-size: 100% 1px;
+  }
+}
+
+/* Call-to-action link over imagery or in editorial blocks: uppercase, underlined. */
+@utility link-cta {
+  font-size: var(--text-label);
+  line-height: var(--text-label--line-height);
+  letter-spacing: var(--tracking-label);
+  text-transform: uppercase;
+  font-weight: 500;
+  text-decoration-line: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.4em;
+  transition: text-underline-offset var(--duration-fast) var(--ease-luxe);
+
+  @media (hover: hover) {
+    &:hover {
+      text-underline-offset: 0.6em;
+    }
+  }
+}
+
+/* ================================================================ */
+/* Buttons                                                           */
+/* Usage: class="btn btn-primary" (+ btn-sm / btn-block)             */
+/* ================================================================ */
+
+@utility btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  min-height: 3rem; /* 48px touch target */
+  padding-inline: 2rem;
+  border: 1px solid transparent;
+  border-radius: 0;
+  font-size: var(--text-label);
+  line-height: 1;
+  letter-spacing: var(--tracking-label);
+  text-transform: uppercase;
+  font-weight: 500;
+  white-space: nowrap;
+  cursor: pointer;
+  user-select: none;
+  transition-property: color, background-color, border-color;
+  transition-duration: var(--duration-base);
+  transition-timing-function: var(--ease-luxe);
+
+  &:disabled,
+  &[aria-disabled="true"] {
+    opacity: 0.4;
+    cursor: not-allowed;
+    pointer-events: none;
+  }
+}
+
+/* Solid black: one per view (add to bag, checkout). */
+@utility btn-primary {
+  background-color: var(--color-ink);
+  border-color: var(--color-ink);
+  color: var(--color-canvas);
+
+  @media (hover: hover) {
+    &:hover {
+      background-color: var(--color-ink-soft);
+      border-color: var(--color-ink-soft);
+    }
+  }
+}
+
+/* Outlined: secondary actions; inverts on hover. */
+@utility btn-secondary {
+  background-color: transparent;
+  border-color: var(--color-ink);
+  color: var(--color-ink);
+
+  @media (hover: hover) {
+    &:hover {
+      background-color: var(--color-ink);
+      color: var(--color-canvas);
+    }
+  }
+}
+
+/* White on dark imagery. */
+@utility btn-inverse {
+  background-color: var(--color-canvas);
+  border-color: var(--color-canvas);
+  color: var(--color-ink);
+
+  @media (hover: hover) {
+    &:hover {
+      background-color: transparent;
+      color: var(--color-canvas);
+    }
+  }
+}
+
+/* Bare icon/text control (wishlist, close, quantity steppers). */
+@utility btn-ghost {
+  background-color: transparent;
+  color: var(--color-ink);
+  padding-inline: 0.75rem;
+
+  @media (hover: hover) {
+    &:hover {
+      background-color: var(--color-surface);
+    }
+  }
+}
+
+@utility btn-sm {
+  min-height: 2.5rem;
+  padding-inline: 1.25rem;
+}
+
+@utility btn-block {
+  display: flex;
+  width: 100%;
 }

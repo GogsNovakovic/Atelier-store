@@ -8,7 +8,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 Next.js 16 (App Router, `src/` dir, Turbopack) + React 19, TypeScript, Tailwind CSS v4 (CSS-first config via `@import "tailwindcss"` in `src/app/globals.css`; there is no `tailwind.config`), Better Auth, Drizzle ORM, Postgres on Neon. Path alias `@/*` → `src/*`.
 
-Built so far: the global design system and the homepage. There is no domain schema or auth method yet. Most linked routes (categories, products, account, bag) don't exist yet and fall through to `src/app/not-found.tsx`.
+Built so far: the global design system, the homepage and the product detail page (`src/app/products/[slug]`). There is no domain schema, auth method or cart yet. Other linked routes (categories, search, account, bag) don't exist yet and fall through to `src/app/not-found.tsx`.
 
 ## Commands
 
@@ -38,4 +38,7 @@ There is no test framework yet.
 - **Spacing token names:** don't name a `--spacing-*` token after a CSS keyword. Tailwind v4 also generates functional utilities from it, so `--spacing-block` made `inline-block` set `inline-size` as well. That is why the in-section rhythm token is called `stack`.
 - **Storefront UI:** `src/components/layout` holds the site header, the mobile menu (native `<dialog>`) and the footer, mounted once in `src/app/layout.tsx`, which also owns `<main id="main">` and the skip link. Homepage sections are in `src/components/home`, in page order, and product cards in `src/components/product`. Client components are kept to leaves (menu, wishlist toggle, newsletter form).
 - **Sample content:** `src/lib/catalog.ts` holds typed sample products, collections and nav, with Unsplash images allowed through `images.remotePatterns` in `next.config.ts`. Replace it with database queries once the catalogue schema exists. Next 16 deprecated `priority` on `next/image`; above-the-fold images use `loading="eager"` with `fetchPriority="high"`.
+- **Product page:** `products/[slug]` prerenders every catalogue product (`generateStaticParams`, `dynamicParams = false`) and emits schema.org Product JSON-LD. Stock state comes from `getStockState()` in `catalog.ts` (sold out at 0, low at 3 or fewer) and is shared by the page, the card label and the JSON-LD. `PurchasePanel` is the only client component. Add to bag tells the shopper no bag exists yet rather than faking success.
+- **Sample photography:** gallery detail views are focal-point crops of the same Unsplash photo (`detail()` in `catalog.ts`). Landscape originals barely change below `fp-z` ≈ 2, because a 4:5 crop is already about a 2× zoom. Check new photos at full size for third-party logos and labels; several were rejected or cropped for this.
+- **Brand assets:** the logotype is the inline SVG `Logo` component (`src/components/ui/logo.tsx`, `currentColor`, pass `title` when it isn't inside a labelled link). Standalone copies live in `public/brand/`. The icons are Next file conventions in `src/app/`: `icon.svg` (vector favicon), `favicon.ico` (16/32/48 PNG frames) and `apple-icon.png` (180px). If the mark changes, regenerate the ICO and PNG from the SVGs.
 

@@ -65,7 +65,6 @@
 
   --tracking-label: 0.12em;
   --tracking-wide-ui: 0.06em;
-  --tracking-wordmark: 0.32em;
 
   /* ---------- Spacing ---------- */
   /* Base scale stays Tailwind's 0.25rem step; these are semantic rhythm tokens. */
@@ -206,13 +205,6 @@
   line-height: var(--text-ui--line-height);
   letter-spacing: var(--tracking-wide-ui);
   text-transform: uppercase;
-  font-weight: 500;
-}
-
-/* Store name set as a wordmark. When centred, add pl-(--tracking-wordmark) to balance the trailing tracking. */
-@utility wordmark {
-  text-transform: uppercase;
-  letter-spacing: var(--tracking-wordmark);
   font-weight: 500;
 }
 

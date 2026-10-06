@@ -1,6 +1,7 @@
 import Link from "next/link";
 
 import { MenuDrawer } from "@/components/layout/menu-drawer";
+import { Logo } from "@/components/ui/logo";
 import { AccountIcon, BagIcon, SearchIcon } from "@/components/ui/icons";
 import { primaryNav } from "@/lib/catalog";
 
@@ -33,12 +34,8 @@ export function SiteHeader() {
           </nav>
         </div>
 
-        <Link
-          href="/"
-          aria-label="Atelier, home"
-          className="wordmark pl-(--tracking-wordmark) text-heading"
-        >
-          Atelier
+        <Link href="/" aria-label="Atelier, home" className="block py-2">
+          <Logo className="h-4 w-auto lg:h-4.5" />
         </Link>
 
         <div className="-mr-3 flex items-center justify-end">

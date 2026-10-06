@@ -1,6 +1,7 @@
 import Link from "next/link";
 
 import { NewsletterForm } from "@/components/layout/newsletter-form";
+import { Logo } from "@/components/ui/logo";
 import { footerNav } from "@/lib/catalog";
 
 export function SiteFooter() {
@@ -40,7 +41,7 @@ export function SiteFooter() {
 
       <div className="border-t border-canvas/15">
         <div className="container-page flex flex-col gap-3 py-8 text-ui text-canvas/70 md:flex-row md:items-center md:justify-between">
-          <p className="wordmark text-ui text-canvas">Atelier</p>
+          <Logo title="Atelier" className="h-3 w-auto text-canvas" />
           <p>
             Atelier is a fictional store built as a demo. Photography from{" "}
             <a href="https://unsplash.com" className="link text-canvas">

@@ -2,7 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 
 import { WishlistButton } from "@/components/product/wishlist-button";
-import { formatPrice, type Product } from "@/lib/catalog";
+import { formatPrice, getStockState, type Product } from "@/lib/catalog";
 
 export function ProductCard({
   product,
@@ -11,6 +11,8 @@ export function ProductCard({
   product: Product;
   sizes?: string;
 }) {
+  const soldOut = getStockState(product).status === "sold-out";
+
   return (
     <article className="group relative">
       <div className="media-stage aspect-product">
@@ -28,7 +30,11 @@ export function ProductCard({
       </div>
 
       <div className="mt-3 flex flex-col gap-1 px-1 sm:px-0">
-        {product.isNew ? <p className="label text-muted">New</p> : null}
+        {soldOut ? (
+          <p className="label text-muted">Sold out</p>
+        ) : product.isNew ? (
+          <p className="label text-muted">New</p>
+        ) : null}
         <h3 className="text-ui">
           {/* Stretched link: the whole card is the click target, the save button sits above it. */}
           <Link href={`/products/${product.slug}`} className="after:absolute after:inset-0">

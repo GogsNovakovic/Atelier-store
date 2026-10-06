@@ -74,6 +74,14 @@ export function CloseIcon(props: IconProps) {
   );
 }
 
+export function PlusIcon(props: IconProps) {
+  return (
+    <Icon {...props}>
+      <path d="M12 5v14M5 12h14" />
+    </Icon>
+  );
+}
+
 export function ArrowIcon(props: IconProps) {
   return (
     <Icon {...props}>

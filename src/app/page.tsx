@@ -6,6 +6,9 @@ import { Intro } from "@/components/home/intro";
 import { NewArrivals } from "@/components/home/new-arrivals";
 import { Services } from "@/components/home/services";
 
+// New arrivals come from the database: refresh the prerendered page at most once a minute.
+export const revalidate = 60;
+
 export default function Home() {
   return (
     <>

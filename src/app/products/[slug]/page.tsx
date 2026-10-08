@@ -7,27 +7,21 @@ import { ProductGallery } from "@/components/product/product-gallery";
 import { PurchasePanel } from "@/components/product/purchase-panel";
 import { StockStatus } from "@/components/product/stock-status";
 import { PlusIcon } from "@/components/ui/icons";
-import {
-  categoryHref,
-  formatPrice,
-  getProduct,
-  getRelatedProducts,
-  getStockState,
-  products,
-  services,
-} from "@/lib/catalog";
+import { formatPrice, getStockState, services } from "@/lib/catalog";
+import { getProduct, getProductSlugs, getRelatedProducts } from "@/lib/products";
 
-// The catalogue is fixed sample data: prerender every product, 404 anything else.
-export const dynamicParams = false;
+// Prerender every product at build, then refresh at most once a minute so stock stays current.
+// Products added later render on first request; unknown slugs 404.
+export const revalidate = 60;
 
-export function generateStaticParams() {
-  return products.map((product) => ({ slug: product.slug }));
+export async function generateStaticParams() {
+  return (await getProductSlugs()).map((slug) => ({ slug }));
 }
 
 export async function generateMetadata({
   params,
 }: PageProps<"/products/[slug]">): Promise<Metadata> {
-  const product = getProduct((await params).slug);
+  const product = await getProduct((await params).slug);
   if (!product) return {};
   return {
     title: product.name,
@@ -37,11 +31,11 @@ export async function generateMetadata({
 }
 
 export default async function ProductPage({ params }: PageProps<"/products/[slug]">) {
-  const product = getProduct((await params).slug);
+  const product = await getProduct((await params).slug);
   if (!product) notFound();
 
   const stock = getStockState(product);
-  const related = getRelatedProducts(product);
+  const related = await getRelatedProducts(product);
 
   const jsonLd = {
     "@context": "https://schema.org",
@@ -49,7 +43,7 @@ export default async function ProductPage({ params }: PageProps<"/products/[slug
     name: product.name,
     description: product.description,
     image: [product.image.src, ...product.gallery.map((image) => image.src)],
-    category: product.category,
+    category: product.category.name,
     color: product.colour,
     offers: {
       "@type": "Offer",
@@ -115,8 +109,8 @@ export default async function ProductPage({ params }: PageProps<"/products/[slug
                   </li>
                   <li aria-hidden="true">/</li>
                   <li>
-                    <Link href={categoryHref(product.category)} className="link-reveal">
-                      {product.category}
+                    <Link href={`/${product.category.slug}`} className="link-reveal">
+                      {product.category.name}
                     </Link>
                   </li>
                 </ol>

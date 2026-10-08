@@ -1,7 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 
-import { categories } from "@/lib/catalog";
+import { categoryTiles } from "@/lib/catalog";
 
 // Phones: a swipeable rail that bleeds to the screen edge. Tablet up: four equal columns.
 export function Categories() {
@@ -12,7 +12,7 @@ export function Categories() {
       </h2>
 
       <ul className="scroller-x -mx-gutter gap-1 px-gutter scroll-px-gutter md:mx-0 md:grid md:grid-cols-4 md:px-0">
-        {categories.map((category) => (
+        {categoryTiles.map((category) => (
           <li key={category.slug} className="w-3/4 sm:w-2/5 md:w-auto">
             <Link
               href={`/${category.slug}`}

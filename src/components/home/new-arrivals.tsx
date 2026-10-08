@@ -1,9 +1,11 @@
 import Link from "next/link";
 
 import { ProductCard } from "@/components/product/product-card";
-import { newArrivals } from "@/lib/catalog";
+import { getNewArrivals } from "@/lib/products";
 
-export function NewArrivals() {
+export async function NewArrivals() {
+  const newArrivals = await getNewArrivals();
+
   return (
     <section aria-labelledby="new-arrivals-title" className="container-page pb-section">
       <div className="mb-stack flex items-baseline justify-between gap-6 px-1 sm:px-0">

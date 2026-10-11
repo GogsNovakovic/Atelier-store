@@ -1,10 +1,17 @@
 // Loads the sample catalogue: `npm run db:seed`. Safe to re-run: categories and products
 // are upserted on slug, and each seeded product's stock rows are replaced.
+import { neon } from "@neondatabase/serverless";
 import { inArray, sql } from "drizzle-orm";
+import { drizzle } from "drizzle-orm/neon-http";
 
+import * as catalogSchema from "./catalog-schema";
 import { categories, products, productStock } from "./catalog-schema";
-import { db } from "./index";
 import { seedCategories, seedProducts } from "./seed-data";
+
+// Writes the catalogue, which the app's role can only read, so it connects as the owner.
+const url = process.env.DATABASE_MIGRATION_URL ?? process.env.DATABASE_URL;
+if (!url) throw new Error("DATABASE_MIGRATION_URL (or DATABASE_URL) is not set");
+const db = drizzle(neon(url), { schema: catalogSchema });
 
 function lookup(ids: Map<string, number>, slug: string): number {
   const id = ids.get(slug);

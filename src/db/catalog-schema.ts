@@ -2,6 +2,7 @@
 // Kept apart from schema.ts because `npm run auth:generate` rewrites that file whole.
 import { relations, sql } from "drizzle-orm";
 import {
+  type AnyPgColumn,
   boolean,
   check,
   index,
@@ -16,11 +17,18 @@ import {
 
 import type { CatalogImage } from "@/lib/catalog";
 
-export const categories = pgTable("categories", {
-  id: integer().primaryKey().generatedAlwaysAsIdentity(),
-  slug: text().notNull().unique(),
-  name: text().notNull(),
-});
+/** Lowercase words joined by single hyphens; slugs are interpolated into URLs. */
+const slugFormat = (slug: AnyPgColumn) => sql`${slug} ~ '^[a-z0-9]+(-[a-z0-9]+)*$'`;
+
+export const categories = pgTable(
+  "categories",
+  {
+    id: integer().primaryKey().generatedAlwaysAsIdentity(),
+    slug: text().notNull().unique(),
+    name: text().notNull(),
+  },
+  (t) => [check("categories_slug_format", slugFormat(t.slug))],
+);
 
 export const products = pgTable(
   "products",
@@ -47,6 +55,7 @@ export const products = pgTable(
   },
   (t) => [
     index("products_category_id_idx").on(t.categoryId),
+    check("products_slug_format", slugFormat(t.slug)),
     check("products_price_cents_non_negative", sql`${t.priceCents} >= 0`),
     check("products_images_not_empty", sql`jsonb_array_length(${t.images}) > 0`),
   ],

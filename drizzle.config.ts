@@ -8,6 +8,7 @@ export default defineConfig({
   out: "./drizzle",
   dialect: "postgresql",
   dbCredentials: {
-    url: process.env.DATABASE_URL!,
+    // The owner role: the app's DATABASE_URL role cannot run DDL.
+    url: (process.env.DATABASE_MIGRATION_URL ?? process.env.DATABASE_URL)!,
   },
 });

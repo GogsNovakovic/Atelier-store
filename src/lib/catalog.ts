@@ -83,6 +83,13 @@ export const hero = {
   ],
 } as const;
 
+/** Mirrors the slug CHECK constraints in src/db/catalog-schema.ts. */
+const SLUG_PATTERN = /^[a-z0-9]+(-[a-z0-9]+)*$/;
+
+export function isSlug(value: string): boolean {
+  return SLUG_PATTERN.test(value);
+}
+
 export type StockState = { status: "in-stock" | "low-stock" | "sold-out"; label: string };
 
 const LOW_STOCK_THRESHOLD = 3;

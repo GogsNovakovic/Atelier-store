@@ -5,7 +5,7 @@ import { cache } from "react";
 
 import { db } from "@/db";
 import { categories, products, productStock } from "@/db/catalog-schema";
-import type { Product } from "@/lib/catalog";
+import { isSlug, type Product } from "@/lib/catalog";
 
 type ProductRow = typeof products.$inferSelect & {
   category: typeof categories.$inferSelect;
@@ -41,6 +41,9 @@ function toProduct(row: ProductRow): Product {
 
 /** Cached per request, so metadata and the page share one query. */
 export const getProduct = cache(async (slug: string): Promise<Product | undefined> => {
+  // A slug the database could never hold 404s without a query: no 500 on bytes like
+  // %00 that Postgres rejects, and no database round trip for junk URLs.
+  if (!isSlug(slug)) return undefined;
   const row = await db.query.products.findFirst({
     where: (p, { eq }) => eq(p.slug, slug),
     with: withRelations,

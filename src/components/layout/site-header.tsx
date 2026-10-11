@@ -22,10 +22,10 @@ export function SiteHeader() {
             <MenuDrawer primary={primaryNav} secondary={accountLinks} />
           </div>
           <nav aria-label="Main" className="hidden lg:block">
-            <ul className="flex gap-5 xl:gap-7">
+            <ul className="flex gap-4 xl:gap-7">
               {primaryNav.map((item) => (
                 <li key={item.href}>
-                  <Link href={item.href} className="label link-reveal">
+                  <Link href={item.href} className="label link-reveal whitespace-nowrap">
                     {item.label}
                   </Link>
                 </li>

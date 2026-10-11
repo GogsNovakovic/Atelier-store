@@ -50,14 +50,10 @@ export function MenuDrawer({
           </div>
 
           <nav aria-label="Main" className="flex-1 overflow-y-auto px-gutter py-stack">
-            <ul className="flex flex-col gap-1">
+            <ul className="flex flex-col">
               {primary.map((item) => (
                 <li key={item.href}>
-                  <Link
-                    href={item.href}
-                    onClick={close}
-                    className="block py-2 text-title"
-                  >
+                  <Link href={item.href} onClick={close} className="label-lg block py-3">
                     {item.label}
                   </Link>
                 </li>

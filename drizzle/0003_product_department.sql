@@ -1,0 +1,2 @@
+ALTER TABLE "products" ADD COLUMN "department" text DEFAULT 'unisex' NOT NULL;--> statement-breakpoint
+ALTER TABLE "products" ADD CONSTRAINT "products_department_valid" CHECK ("products"."department" IN ('women', 'men', 'unisex'));

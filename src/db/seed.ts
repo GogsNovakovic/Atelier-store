@@ -33,6 +33,7 @@ async function main() {
       seedProducts.map((product) => ({
         slug: product.slug,
         categoryId: lookup(categoryIds, product.category),
+        department: product.department,
         name: product.name,
         priceCents: product.priceCents,
         colour: product.colour,
@@ -46,6 +47,7 @@ async function main() {
       target: products.slug,
       set: {
         categoryId: sql`excluded.category_id`,
+        department: sql`excluded.department`,
         name: sql`excluded.name`,
         priceCents: sql`excluded.price_cents`,
         colour: sql`excluded.colour`,

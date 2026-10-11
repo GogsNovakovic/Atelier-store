@@ -15,7 +15,7 @@ import {
   unique,
 } from "drizzle-orm/pg-core";
 
-import type { CatalogImage } from "@/lib/catalog";
+import type { CatalogImage, Department } from "@/lib/catalog";
 
 /** Lowercase words joined by single hyphens; slugs are interpolated into URLs. */
 const slugFormat = (slug: AnyPgColumn) => sql`${slug} ~ '^[a-z0-9]+(-[a-z0-9]+)*$'`;
@@ -46,6 +46,8 @@ export const products = pgTable(
     details: text().array().notNull().default(sql`'{}'::text[]`),
     /** In display order; the first is the primary image used on product cards. */
     images: jsonb().$type<CatalogImage[]>().notNull(),
+    /** Which department lists it; unisex pieces appear under both Women and Men. */
+    department: text().$type<Department>().notNull().default("unisex"),
     isNew: boolean("is_new").notNull().default(false),
     createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
     updatedAt: timestamp("updated_at", { withTimezone: true })
@@ -58,6 +60,7 @@ export const products = pgTable(
     check("products_slug_format", slugFormat(t.slug)),
     check("products_price_cents_non_negative", sql`${t.priceCents} >= 0`),
     check("products_images_not_empty", sql`jsonb_array_length(${t.images}) > 0`),
+    check("products_department_valid", sql`${t.department} IN ('women', 'men', 'unisex')`),
   ],
 );
 

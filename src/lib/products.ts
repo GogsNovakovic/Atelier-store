@@ -1,11 +1,11 @@
 import "server-only";
 
-import { asc, sql } from "drizzle-orm";
+import { asc, desc, inArray, sql } from "drizzle-orm";
 import { cache } from "react";
 
 import { db } from "@/db";
 import { categories, products, productStock } from "@/db/catalog-schema";
-import { isSlug, type Product } from "@/lib/catalog";
+import { isSlug, type Product, type ProductFilter } from "@/lib/catalog";
 
 type ProductRow = typeof products.$inferSelect & {
   category: typeof categories.$inferSelect;
@@ -25,6 +25,7 @@ function toProduct(row: ProductRow): Product {
     slug: row.slug,
     name: row.name,
     category: { id: row.category.id, slug: row.category.slug, name: row.category.name },
+    department: row.department,
     price: row.priceCents / 100,
     colour: row.colour,
     description: row.description,
@@ -56,10 +57,45 @@ export async function getProductSlugs(): Promise<string[]> {
   return rows.map((row) => row.slug);
 }
 
+export async function getCategorySlugs(): Promise<string[]> {
+  const rows = await db.select({ slug: categories.slug }).from(categories);
+  return rows.map((row) => row.slug);
+}
+
+/** Cached per request, so metadata and the page share one query. */
+export const getCategory = cache(
+  async (slug: string): Promise<{ slug: string; name: string } | undefined> => {
+    if (!isSlug(slug)) return undefined;
+    return db.query.categories.findFirst({
+      columns: { slug: true, name: true },
+      where: (c, { eq }) => eq(c.slug, slug),
+    });
+  },
+);
+
+/** Newest first; ties (rows seeded together) keep catalogue order. */
+const newestFirst = { orderBy: [desc(products.createdAt), asc(products.id)] };
+
 export async function getNewArrivals(limit = 8): Promise<Product[]> {
+  const rows = await db.query.products.findMany({ with: withRelations, ...newestFirst, limit });
+  return rows.map(toProduct);
+}
+
+/** A listing page's products, newest first. Women and Men include unisex pieces. */
+export async function getListingProducts(filter: ProductFilter, limit = 48): Promise<Product[]> {
   const rows = await db.query.products.findMany({
+    where: (p, { inArray: within }) =>
+      "department" in filter
+        ? within(p.department, [filter.department, "unisex"])
+        : within(
+            p.categoryId,
+            db
+              .select({ id: categories.id })
+              .from(categories)
+              .where(inArray(categories.slug, filter.categories)),
+          ),
     with: withRelations,
-    orderBy: (p, { asc, desc }) => [desc(p.createdAt), asc(p.id)],
+    ...newestFirst,
     limit,
   });
   return rows.map(toProduct);
